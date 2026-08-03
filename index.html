@@ -168,7 +168,7 @@
         const ids = [...el('adminList').children].map((card) => card.dataset.id);
         const changed = ids.some((id, index) => id !== tracks[index]?.id);
         if (!changed) { draggedId = null; return; }
-        tracks = ids.map((id) => tracks.find((track) => track.id === id)); renderHome();
+        tracks = ids.map((id) => tracks.find((track) => track.id === id)); renderAdmin(); renderHome();
         try { await adminRequest({ action:'reorder', order:ids }); setStatus('Порядок сохранён.'); }
         catch (cause) { setStatus(cause.message, true); await loadTracks(); }
         finally { draggedId = null; }

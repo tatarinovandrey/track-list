@@ -55,7 +55,6 @@
       .admin-list { display:grid; gap:8px; margin-top:20px; }
       .admin-track { display:grid; grid-template-columns:28px 36px 1fr auto; align-items:center; gap:5px; min-height:58px; padding:8px 10px; border:1px solid var(--line); border-radius:14px; background:rgba(255,253,249,.8); transition:transform .18s cubic-bezier(.2,.8,.2,1),box-shadow .18s,border-color .18s; }
       .admin-track.dragging { z-index:10; opacity:.96; border-color:#dba083; box-shadow:0 16px 32px rgba(92,54,29,.18); cursor:grabbing; transition:none; }
-      .admin-track.dragging .track-number { visibility:hidden; }
       .drag-placeholder { min-height:58px; border:1.5px dashed #dba083; border-radius:14px; background:rgba(247,229,216,.45); }
       .handle { color:#b9a99c; font-size:1.1rem; letter-spacing:-.18em; user-select:none; cursor:grab; touch-action:none; }
       body.sorting-tracks { user-select:none; cursor:grabbing; }
@@ -163,6 +162,7 @@
         const items = [...el('adminList').children].filter((item) => item !== dragState?.card);
         let visibleIndex = 0;
         items.forEach((item) => { if (!item.classList.contains('drag-placeholder')) item.querySelector('.track-number').textContent = formatNumber(visibleIndex++); });
+        if (dragState) dragState.card.querySelector('.track-number').textContent = formatNumber(items.findIndex((item) => item.classList.contains('drag-placeholder')));
       }
       function movePlaceholder(pointerY) {
         const { list, placeholder } = dragState;

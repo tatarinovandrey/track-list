@@ -51,9 +51,9 @@
       .admin-head { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:24px; }
       .admin-note { color:var(--muted); font-size:.88rem; line-height:1.45; }
       .admin-list { display:grid; gap:8px; margin-top:20px; }
-      .admin-track { display:grid; grid-template-columns:28px 36px 1fr auto; align-items:center; gap:5px; min-height:58px; padding:8px 10px; border:1px solid var(--line); border-radius:14px; background:rgba(255,253,249,.8); }
+      .admin-track { display:grid; grid-template-columns:28px 36px 1fr auto; align-items:center; gap:5px; min-height:58px; padding:8px 10px; border:1px solid var(--line); border-radius:14px; background:rgba(255,253,249,.8); transition:transform .18s cubic-bezier(.2,.8,.2,1),box-shadow .18s,border-color .18s; }
       .admin-track[draggable="true"] { cursor:grab; }
-      .admin-track.dragging { opacity:.45; }
+      .admin-track.dragging { opacity:.42; border-color:#dba083; box-shadow:0 10px 24px rgba(92,54,29,.12); }
       .handle { color:#b9a99c; font-size:1.1rem; letter-spacing:-.18em; user-select:none; }
       .edit { border:0; color:var(--accent-deep); background:transparent; padding:9px; font-weight:750; }
       .status { min-height:20px; margin:16px 0 0; color:var(--muted); font-size:.86rem; }
@@ -147,10 +147,29 @@
       el('editorCancel').addEventListener('click', () => el('editorDialog').close());
       el('editorForm').addEventListener('submit', async (event) => { event.preventDefault(); const error = el('editorError'); error.hidden = true; const title = el('trackTitleInput').value.trim(), lyrics = el('trackLyricsInput').value; try { await adminRequest(editingId ? { action:'update', id:editingId, title, lyrics } : { action:'create', title, lyrics }); await loadTracks(); el('editorDialog').close(); setStatus('Сохранено.'); } catch (cause) { error.textContent = cause.message; error.hidden = false; } });
       el('adminList').addEventListener('click', (event) => { const id = event.target.dataset.edit; if (id) openEditor(id); });
-      el('adminList').addEventListener('dragstart', (event) => { const card = event.target.closest('[data-id]'); if (!card) return; draggedId = card.dataset.id; card.classList.add('dragging'); event.dataTransfer.effectAllowed = 'move'; });
-      el('adminList').addEventListener('dragend', (event) => event.target.closest('[data-id]')?.classList.remove('dragging'));
-      el('adminList').addEventListener('dragover', (event) => event.preventDefault());
-      el('adminList').addEventListener('drop', async (event) => { event.preventDefault(); const target = event.target.closest('[data-id]'); if (!target || !draggedId || target.dataset.id === draggedId) return; const from = tracks.findIndex((track) => track.id === draggedId), to = tracks.findIndex((track) => track.id === target.dataset.id); const next = [...tracks]; next.splice(to, 0, next.splice(from, 1)[0]); tracks = next; renderAdmin(); renderHome(); try { await adminRequest({ action:'reorder', order:tracks.map((track) => track.id) }); setStatus('Порядок сохранён.'); } catch (cause) { setStatus(cause.message, true); await loadTracks(); } finally { draggedId = null; } });
+      function moveDraggingCard(pointerY) {
+        const list = el('adminList'), dragging = [...list.children].find((card) => card.dataset.id === draggedId);
+        if (!dragging) return;
+        const cards = [...list.children].filter((card) => card !== dragging);
+        const after = cards.find((card) => pointerY < card.getBoundingClientRect().top + card.getBoundingClientRect().height / 2);
+        if ((after && dragging.nextElementSibling === after) || (!after && list.lastElementChild === dragging)) return;
+        const before = new Map(cards.map((card) => [card, card.getBoundingClientRect()]));
+        list.insertBefore(dragging, after || null);
+        cards.forEach((card) => { const previous = before.get(card), current = card.getBoundingClientRect(); const delta = previous.top - current.top; if (!delta) return; card.animate([{ transform: `translateY(${delta}px)` }, { transform: 'translateY(0)' }], { duration: 180, easing: 'cubic-bezier(.2,.8,.2,1)' }); });
+      }
+      async function saveDraggedOrder() {
+        const ids = [...el('adminList').children].map((card) => card.dataset.id);
+        const changed = ids.some((id, index) => id !== tracks[index]?.id);
+        if (!changed) { draggedId = null; return; }
+        tracks = ids.map((id) => tracks.find((track) => track.id === id)); renderHome();
+        try { await adminRequest({ action:'reorder', order:ids }); setStatus('Порядок сохранён.'); }
+        catch (cause) { setStatus(cause.message, true); await loadTracks(); }
+        finally { draggedId = null; }
+      }
+      el('adminList').addEventListener('dragstart', (event) => { const card = event.target.closest('[data-id]'); if (!card) return; draggedId = card.dataset.id; card.classList.add('dragging'); event.dataTransfer.effectAllowed = 'move'; event.dataTransfer.setData('text/plain', draggedId); });
+      el('adminList').addEventListener('dragover', (event) => { event.preventDefault(); if (draggedId) moveDraggingCard(event.clientY); });
+      el('adminList').addEventListener('drop', (event) => event.preventDefault());
+      el('adminList').addEventListener('dragend', async (event) => { event.target.closest('[data-id]')?.classList.remove('dragging'); await saveDraggedOrder(); });
       loadTracks().catch((cause) => { el('emptyState').textContent = cause.message; el('emptyState').hidden = false; });
     </script>
   </body>

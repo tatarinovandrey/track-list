@@ -123,7 +123,8 @@
 
       function renderHome() {
         const query = el('search').value.trim().toLocaleLowerCase('ru');
-        const filtered = tracks.filter((track) => track.title.toLocaleLowerCase('ru').includes(query));
+        const requestedPosition = /^\d+$/.test(query) ? Number(query) : null;
+        const filtered = tracks.filter((track, index) => track.title.toLocaleLowerCase('ru').includes(query) || requestedPosition === index + 1);
         el('trackList').innerHTML = filtered.map((track) => { const index = tracks.findIndex((item) => item.id === track.id); return `<button class="track" type="button" data-id="${track.id}"><span class="track-number">${formatNumber(index)}</span><span class="track-title">${escapeText(track.title)}</span><span class="arrow">→</span></button>`; }).join('');
         const empty = el('emptyState'); empty.hidden = filtered.length > 0; empty.textContent = tracks.length ? 'Ничего не найдено.' : 'Здесь пока нет треков. Добавьте первый в админке.';
       }

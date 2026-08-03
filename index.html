@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Сайт скоро заработает" />
+    <title>Скоро сайт заработает</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: #101114;
+        color: #f5f3ef;
+      }
+
+      * { box-sizing: border-box; }
+      body { margin: 0; min-width: 320px; }
+
+      main {
+        min-height: 100svh;
+        display: grid;
+        place-items: center;
+        padding: 24px;
+        overflow: hidden;
+        background:
+          radial-gradient(circle at 15% 10%, rgba(239, 111, 77, .2), transparent 34%),
+          radial-gradient(circle at 90% 90%, rgba(81, 97, 211, .2), transparent 38%),
+          #101114;
+      }
+
+      .card { width: min(100%, 680px); text-align: center; }
+      .mark {
+        width: 56px; height: 56px; margin: 0 auto 32px;
+        display: grid; place-items: center; border-radius: 18px;
+        color: #101114; background: #f5f3ef; font-size: 24px; font-weight: 800;
+        transform: rotate(-8deg);
+      }
+      h1 { margin: 0; font-size: clamp(2.5rem, 11vw, 6.5rem); line-height: .94; letter-spacing: -.07em; }
+      p { max-width: 420px; margin: 28px auto 0; color: #a8a7aa; font-size: clamp(1rem, 3.8vw, 1.2rem); line-height: 1.5; }
+      .line { width: 64px; height: 3px; margin: 36px auto 0; border-radius: 99px; background: #ef6f4d; }
+
+      @media (max-width: 480px) {
+        main { padding: 20px; }
+        .mark { width: 48px; height: 48px; margin-bottom: 26px; border-radius: 15px; }
+        p { margin-top: 22px; }
+        .line { margin-top: 28px; }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <section class="card" aria-labelledby="title">
+        <div class="mark" aria-hidden="true">↗</div>
+        <h1 id="title">Скоро сайт<br />заработает</h1>
+        <p>Мы уже готовим всё необходимое. Загляните сюда немного позже.</p>
+        <div class="line" aria-hidden="true"></div>
+      </section>
+    </main>
+  </body>
+</html>

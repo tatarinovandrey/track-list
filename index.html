@@ -3,58 +3,155 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="Сайт скоро заработает" />
-    <title>Скоро сайт заработает</title>
+    <meta name="theme-color" content="#f8f3ed" />
+    <meta name="description" content="Тексты треков" />
+    <title>Трек-лист</title>
     <style>
-      :root {
-        color-scheme: dark;
-        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-        background: #101114;
-        color: #f5f3ef;
-      }
-
-      * { box-sizing: border-box; }
-      body { margin: 0; min-width: 320px; }
-
-      main {
-        min-height: 100svh;
-        display: grid;
-        place-items: center;
-        padding: 24px;
-        overflow: hidden;
-        background:
-          radial-gradient(circle at 15% 10%, rgba(239, 111, 77, .2), transparent 34%),
-          radial-gradient(circle at 90% 90%, rgba(81, 97, 211, .2), transparent 38%),
-          #101114;
-      }
-
-      .card { width: min(100%, 680px); text-align: center; }
-      .mark {
-        width: 56px; height: 56px; margin: 0 auto 32px;
-        display: grid; place-items: center; border-radius: 18px;
-        color: #101114; background: #f5f3ef; font-size: 24px; font-weight: 800;
-        transform: rotate(-8deg);
-      }
-      h1 { margin: 0; font-size: clamp(2.5rem, 11vw, 6.5rem); line-height: .94; letter-spacing: -.07em; }
-      p { max-width: 420px; margin: 28px auto 0; color: #a8a7aa; font-size: clamp(1rem, 3.8vw, 1.2rem); line-height: 1.5; }
-      .line { width: 64px; height: 3px; margin: 36px auto 0; border-radius: 99px; background: #ef6f4d; }
-
-      @media (max-width: 480px) {
-        main { padding: 20px; }
-        .mark { width: 48px; height: 48px; margin-bottom: 26px; border-radius: 15px; }
-        p { margin-top: 22px; }
-        .line { margin-top: 28px; }
-      }
+      :root { --ink:#282522; --muted:#80776d; --paper:#f8f3ed; --card:#fffdf9; --line:#e8ded3; --accent:#c96543; --accent-deep:#9e462c; --shadow:0 14px 35px rgba(64,42,26,.08); font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; color:var(--ink); background:var(--paper); }
+      * { box-sizing:border-box; }
+      body { margin:0; min-width:320px; min-height:100vh; background:radial-gradient(circle at 93% 3%,#f5cfb3 0,transparent 26rem),radial-gradient(circle at 0 80%,#ebe1cb 0,transparent 22rem),var(--paper); }
+      button,input,textarea { font:inherit; }
+      button { cursor:pointer; }
+      .shell { width:min(100%,780px); min-height:100svh; margin:0 auto; padding:34px 20px 52px; }
+      .topline { display:flex; align-items:center; justify-content:space-between; gap:20px; margin-bottom:34px; }
+      .eyebrow { display:block; color:var(--accent-deep); font-size:.74rem; font-weight:800; letter-spacing:.12em; text-transform:uppercase; }
+      h1 { margin:5px 0 0; font-size:clamp(2rem,7.5vw,3.7rem); letter-spacing:-.07em; line-height:.96; }
+      h2 { margin:0; font-size:1.2rem; letter-spacing:-.03em; }
+      .ghost { border:0; background:transparent; color:var(--muted); padding:8px; border-radius:10px; }
+      .ghost:hover { color:var(--ink); background:rgba(255,255,255,.55); }
+      #adminTrigger { opacity:.28; font-size:1.1rem; letter-spacing:.12em; }
+      #adminTrigger:hover,#adminTrigger:focus-visible { opacity:.9; }
+      .search { width:100%; margin-bottom:16px; padding:14px 16px; border:1px solid var(--line); border-radius:15px; color:var(--ink); outline:none; background:rgba(255,253,249,.8); box-shadow:0 4px 16px rgba(53,37,25,.03); }
+      .search:focus { border-color:#dba083; box-shadow:0 0 0 4px rgba(201,101,67,.12); }
+      .track-list { display:grid; gap:8px; }
+      .track { display:grid; grid-template-columns:42px 1fr auto; align-items:center; width:100%; min-height:62px; padding:8px 12px 8px 8px; border:1px solid var(--line); border-radius:15px; color:inherit; text-align:left; background:rgba(255,253,249,.84); box-shadow:0 3px 12px rgba(53,37,25,.025); transition:transform .16s,box-shadow .16s,border-color .16s; }
+      .track:hover { transform:translateY(-1px); border-color:#dcb299; box-shadow:var(--shadow); }
+      .track-number { display:grid; place-items:center; width:34px; height:34px; border-radius:11px; color:var(--accent-deep); background:#f7e5d8; font-size:.75rem; font-weight:800; }
+      .track-title { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-weight:720; letter-spacing:-.02em; }
+      .arrow { color:var(--accent); font-size:1.35rem; }
+      .empty { margin:38px auto; color:var(--muted); text-align:center; }
+      .detail-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:34px; }
+      .back { display:inline-flex; align-items:center; gap:8px; border:0; color:var(--ink); background:transparent; padding:8px 0; font-weight:700; }
+      .back:hover { color:var(--accent-deep); }
+      .lyrics { margin:30px 0 0; padding:22px; border:1px solid var(--line); border-radius:18px; background:rgba(255,253,249,.78); box-shadow:var(--shadow); white-space:pre-wrap; font-family:inherit; font-size:1rem; line-height:1.72; }
+      .no-lyrics { color:var(--muted); font-style:italic; }
+      dialog { width:min(calc(100% - 32px),390px); padding:0; border:0; border-radius:20px; color:var(--ink); background:var(--card); box-shadow:0 24px 70px rgba(39,26,17,.28); }
+      dialog::backdrop { background:rgba(48,36,27,.36); backdrop-filter:blur(3px); }
+      .dialog-content { padding:24px; }
+      .dialog-content h2 { margin-bottom:8px; }
+      .dialog-content p { margin:0 0 20px; color:var(--muted); font-size:.9rem; line-height:1.45; }
+      .field { display:grid; gap:7px; margin-top:14px; color:#655c54; font-size:.82rem; font-weight:700; }
+      input,textarea { width:100%; border:1px solid var(--line); border-radius:12px; padding:12px; color:var(--ink); background:#fffefa; outline:none; resize:vertical; }
+      input:focus,textarea:focus { border-color:#dba083; box-shadow:0 0 0 3px rgba(201,101,67,.12); }
+      .actions { display:flex; justify-content:flex-end; gap:9px; margin-top:21px; }
+      .secondary,.primary { min-height:40px; border-radius:11px; padding:0 14px; font-weight:760; }
+      .secondary { border:1px solid var(--line); color:var(--ink); background:transparent; }
+      .primary { border:1px solid var(--accent); color:white; background:var(--accent); }
+      .primary:hover { background:var(--accent-deep); border-color:var(--accent-deep); }
+      .admin-head { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:24px; }
+      .admin-note { color:var(--muted); font-size:.88rem; line-height:1.45; }
+      .admin-list { display:grid; gap:8px; margin-top:20px; }
+      .admin-track { display:grid; grid-template-columns:28px 36px 1fr auto; align-items:center; gap:5px; min-height:58px; padding:8px 10px; border:1px solid var(--line); border-radius:14px; background:rgba(255,253,249,.8); }
+      .admin-track[draggable="true"] { cursor:grab; }
+      .admin-track.dragging { opacity:.45; }
+      .handle { color:#b9a99c; font-size:1.1rem; letter-spacing:-.18em; user-select:none; }
+      .edit { border:0; color:var(--accent-deep); background:transparent; padding:9px; font-weight:750; }
+      .status { min-height:20px; margin:16px 0 0; color:var(--muted); font-size:.86rem; }
+      .status.error { color:#a33927; }
+      [hidden] { display:none !important; }
+      @media (max-width:480px) { .shell { padding:25px 15px 42px; } .topline { margin-bottom:26px; } .track { min-height:58px; } .lyrics { margin-top:24px; padding:18px; } }
     </style>
   </head>
   <body>
-    <main>
-      <section class="card" aria-labelledby="title">
-        <div class="mark" aria-hidden="true">↗</div>
-        <h1 id="title">Скоро сайт<br />заработает</h1>
-        <p>Мы уже готовим всё необходимое. Загляните сюда немного позже.</p>
-        <div class="line" aria-hidden="true"></div>
+    <main class="shell">
+      <section id="homeView">
+        <div class="topline">
+          <div><span class="eyebrow">все тексты</span><h1>Трек-лист</h1></div>
+          <button class="ghost" id="adminTrigger" type="button" aria-label="Войти в админку">···</button>
+        </div>
+        <label class="sr-only" hidden for="search">Поиск по названию</label>
+        <input class="search" id="search" type="search" placeholder="Поиск по названию" autocomplete="off" />
+        <div id="trackList" class="track-list" aria-live="polite"></div>
+        <p id="emptyState" class="empty" hidden></p>
+      </section>
+
+      <section id="detailView" hidden>
+        <div class="detail-header"><button class="back" id="backButton" type="button">← Назад</button></div>
+        <span id="detailNumber" class="eyebrow"></span>
+        <h1 id="detailTitle"></h1>
+        <pre id="lyrics" class="lyrics"></pre>
+      </section>
+
+      <section id="adminView" hidden>
+        <div class="admin-head"><div><span class="eyebrow">режим редактирования</span><h1>Админка</h1></div><button class="secondary" id="logout" type="button">Выйти</button></div>
+        <p class="admin-note">Добавляйте и редактируйте треки. Чтобы изменить порядок, перетащите карточку за точки слева.</p>
+        <div class="actions" style="justify-content:flex-start"><button class="primary" id="newTrack" type="button">+ Добавить трек</button></div>
+        <div id="adminList" class="admin-list"></div>
+        <p id="adminStatus" class="status" aria-live="polite"></p>
       </section>
     </main>
+
+    <dialog id="loginDialog"><form class="dialog-content" id="loginForm"><h2>Вход</h2><p>Доступ к редактированию треков.</p><label class="field">Пароль<input id="password" type="password" required autofocus /></label><p id="loginError" class="status error" hidden></p><div class="actions"><button class="secondary" id="loginCancel" type="button">Отмена</button><button class="primary" type="submit">Войти</button></div></form></dialog>
+    <dialog id="editorDialog"><form class="dialog-content" id="editorForm"><h2 id="editorTitle">Новый трек</h2><label class="field">Название<input id="trackTitleInput" maxlength="160" required /></label><label class="field">Текст трека<textarea id="trackLyricsInput" rows="10" maxlength="50000" placeholder="Вставьте текст трека"></textarea></label><p id="editorError" class="status error" hidden></p><div class="actions"><button class="secondary" id="editorCancel" type="button">Отмена</button><button class="primary" type="submit">Сохранить</button></div></form></dialog>
+
+    <script>
+      const SUPABASE_URL = 'https://alplkxztueetzuzjzyjw.supabase.co';
+      const SUPABASE_KEY = 'sb_publishable_jFeabRF877B_1zd-zF7yaw_xpxngc62';
+      const ADMIN_ENDPOINT = `${SUPABASE_URL}/functions/v1/track-admin`;
+      let tracks = [], adminPassword = '', editingId = null, draggedId = null;
+      const el = (id) => document.getElementById(id);
+      const homeView = el('homeView'), detailView = el('detailView'), adminView = el('adminView');
+
+      function setStatus(message = '', error = false) { const node = el('adminStatus'); node.textContent = message; node.classList.toggle('error', error); }
+      function show(view) { [homeView, detailView, adminView].forEach((node) => node.hidden = node !== view); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+      function formatNumber(index) { return String(index + 1).padStart(2, '0'); }
+      function escapeText(value) { const div = document.createElement('div'); div.textContent = value; return div.innerHTML; }
+
+      async function loadTracks() {
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/tracks?select=id,title,lyrics,position&order=position.asc`, { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } });
+        if (!response.ok) throw new Error('Не получилось загрузить треки. Попробуйте обновить страницу.');
+        tracks = await response.json(); renderHome(); renderAdmin();
+      }
+
+      function renderHome() {
+        const query = el('search').value.trim().toLocaleLowerCase('ru');
+        const filtered = tracks.filter((track) => track.title.toLocaleLowerCase('ru').includes(query));
+        el('trackList').innerHTML = filtered.map((track) => { const index = tracks.findIndex((item) => item.id === track.id); return `<button class="track" type="button" data-id="${track.id}"><span class="track-number">${formatNumber(index)}</span><span class="track-title">${escapeText(track.title)}</span><span class="arrow">→</span></button>`; }).join('');
+        const empty = el('emptyState'); empty.hidden = filtered.length > 0; empty.textContent = tracks.length ? 'Ничего не найдено.' : 'Здесь пока нет треков. Добавьте первый в админке.';
+      }
+
+      function openTrack(id) { const track = tracks.find((item) => item.id === id); if (!track) return; const index = tracks.indexOf(track); el('detailNumber').textContent = `трек ${formatNumber(index)}`; el('detailTitle').textContent = track.title; const lyrics = el('lyrics'); lyrics.textContent = track.lyrics || 'Текст трека пока не добавлен.'; lyrics.classList.toggle('no-lyrics', !track.lyrics); show(detailView); }
+
+      function renderAdmin() {
+        if (!adminPassword) return;
+        el('adminList').innerHTML = tracks.map((track, index) => `<article class="admin-track" draggable="true" data-id="${track.id}"><span class="handle" aria-hidden="true">⠿</span><span class="track-number">${formatNumber(index)}</span><strong class="track-title">${escapeText(track.title)}</strong><button class="edit" type="button" data-edit="${track.id}">Изменить</button></article>`).join('');
+      }
+
+      async function adminRequest(payload) {
+        const response = await fetch(ADMIN_ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...payload, password: adminPassword }) });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(data.error || 'Не удалось сохранить изменения.');
+        return data;
+      }
+
+      function openEditor(id = null) { editingId = id; const track = tracks.find((item) => item.id === id); el('editorTitle').textContent = track ? 'Редактировать трек' : 'Новый трек'; el('trackTitleInput').value = track?.title || ''; el('trackLyricsInput').value = track?.lyrics || ''; el('editorError').hidden = true; el('editorDialog').showModal(); el('trackTitleInput').focus(); }
+
+      el('search').addEventListener('input', renderHome);
+      el('trackList').addEventListener('click', (event) => { const button = event.target.closest('[data-id]'); if (button) openTrack(button.dataset.id); });
+      el('backButton').addEventListener('click', () => show(homeView));
+      el('adminTrigger').addEventListener('click', () => { el('loginError').hidden = true; el('loginDialog').showModal(); el('password').focus(); });
+      el('loginCancel').addEventListener('click', () => el('loginDialog').close());
+      el('loginForm').addEventListener('submit', async (event) => { event.preventDefault(); const candidate = el('password').value; try { const response = await fetch(ADMIN_ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'verify', password: candidate }) }); if (!response.ok) throw new Error(); adminPassword = candidate; el('password').value = ''; el('loginDialog').close(); renderAdmin(); show(adminView); } catch { el('loginError').textContent = 'Неверный пароль.'; el('loginError').hidden = false; } });
+      el('logout').addEventListener('click', () => { adminPassword = ''; show(homeView); });
+      el('newTrack').addEventListener('click', () => openEditor());
+      el('editorCancel').addEventListener('click', () => el('editorDialog').close());
+      el('editorForm').addEventListener('submit', async (event) => { event.preventDefault(); const error = el('editorError'); error.hidden = true; const title = el('trackTitleInput').value.trim(), lyrics = el('trackLyricsInput').value; try { await adminRequest(editingId ? { action:'update', id:editingId, title, lyrics } : { action:'create', title, lyrics }); await loadTracks(); el('editorDialog').close(); setStatus('Сохранено.'); } catch (cause) { error.textContent = cause.message; error.hidden = false; } });
+      el('adminList').addEventListener('click', (event) => { const id = event.target.dataset.edit; if (id) openEditor(id); });
+      el('adminList').addEventListener('dragstart', (event) => { const card = event.target.closest('[data-id]'); if (!card) return; draggedId = card.dataset.id; card.classList.add('dragging'); event.dataTransfer.effectAllowed = 'move'; });
+      el('adminList').addEventListener('dragend', (event) => event.target.closest('[data-id]')?.classList.remove('dragging'));
+      el('adminList').addEventListener('dragover', (event) => event.preventDefault());
+      el('adminList').addEventListener('drop', async (event) => { event.preventDefault(); const target = event.target.closest('[data-id]'); if (!target || !draggedId || target.dataset.id === draggedId) return; const from = tracks.findIndex((track) => track.id === draggedId), to = tracks.findIndex((track) => track.id === target.dataset.id); const next = [...tracks]; next.splice(to, 0, next.splice(from, 1)[0]); tracks = next; renderAdmin(); renderHome(); try { await adminRequest({ action:'reorder', order:tracks.map((track) => track.id) }); setStatus('Порядок сохранён.'); } catch (cause) { setStatus(cause.message, true); await loadTracks(); } finally { draggedId = null; } });
+      loadTracks().catch((cause) => { el('emptyState').textContent = cause.message; el('emptyState').hidden = false; });
+    </script>
   </body>
 </html>

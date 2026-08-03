@@ -55,6 +55,7 @@
       .admin-track.dragging { z-index:10; opacity:.96; border-color:#dba083; box-shadow:0 16px 32px rgba(92,54,29,.18); cursor:grabbing; transition:none; }
       .drag-placeholder { min-height:58px; border:1.5px dashed #dba083; border-radius:14px; background:rgba(247,229,216,.45); }
       .handle { color:#b9a99c; font-size:1.1rem; letter-spacing:-.18em; user-select:none; cursor:grab; touch-action:none; }
+      body.sorting-tracks { user-select:none; cursor:grabbing; }
       .edit { border:0; color:var(--accent-deep); background:transparent; padding:9px; font-weight:750; }
       .status { min-height:20px; margin:16px 0 0; color:var(--muted); font-size:.86rem; }
       .status.error { color:#a33927; }
@@ -124,7 +125,7 @@
 
       function renderAdmin() {
         if (!adminPassword) return;
-        el('adminList').innerHTML = tracks.map((track, index) => `<article class="admin-track" data-id="${track.id}"><span class="handle" aria-label="Перетащить трек" role="button" tabindex="0">⠿</span><span class="track-number">${formatNumber(index)}</span><strong class="track-title">${escapeText(track.title)}</strong><button class="edit" type="button" data-edit="${track.id}">Изменить</button></article>`).join('');
+        el('adminList').innerHTML = tracks.map((track, index) => `<article class="admin-track" draggable="false" data-id="${track.id}"><span class="handle" draggable="false" aria-label="Перетащить трек" role="button" tabindex="0">⠿</span><span class="track-number">${formatNumber(index)}</span><strong class="track-title">${escapeText(track.title)}</strong><button class="edit" type="button" data-edit="${track.id}">Изменить</button></article>`).join('');
       }
 
       async function adminRequest(payload) {
@@ -148,9 +149,10 @@
       el('editorForm').addEventListener('submit', async (event) => { event.preventDefault(); const error = el('editorError'); error.hidden = true; const title = el('trackTitleInput').value.trim(), lyrics = el('trackLyricsInput').value; try { await adminRequest(editingId ? { action:'update', id:editingId, title, lyrics } : { action:'create', title, lyrics }); await loadTracks(); el('editorDialog').close(); setStatus('Сохранено.'); } catch (cause) { error.textContent = cause.message; error.hidden = false; } });
       el('adminList').addEventListener('click', (event) => { const id = event.target.dataset.edit; if (id) openEditor(id); });
       function refreshAdminNumbers() {
-        let number = 1, placeholderNumber = 1;
-        [...el('adminList').children].forEach((item) => { if (item.classList.contains('drag-placeholder')) { placeholderNumber = number++; return; } item.querySelector('.track-number').textContent = formatNumber(number++); });
-        if (dragState) dragState.card.querySelector('.track-number').textContent = formatNumber(placeholderNumber);
+        const items = [...el('adminList').children].filter((item) => item !== dragState?.card);
+        const placeholderIndex = items.findIndex((item) => item.classList.contains('drag-placeholder'));
+        items.forEach((item, index) => { if (!item.classList.contains('drag-placeholder')) item.querySelector('.track-number').textContent = formatNumber(index + 1); });
+        if (dragState) dragState.card.querySelector('.track-number').textContent = formatNumber(placeholderIndex + 1);
       }
       function movePlaceholder(pointerY) {
         const { list, placeholder } = dragState;
@@ -190,6 +192,7 @@
         draggedId = card.dataset.id; dragState = { pointerId:event.pointerId, card, placeholder, list, offsetY:event.clientY - rect.top };
         card.classList.add('dragging'); Object.assign(card.style, { position:'fixed', top:`${rect.top}px`, left:`${rect.left}px`, width:`${rect.width}px`, pointerEvents:'none' }); document.body.append(card); document.body.classList.add('sorting-tracks'); handle.setPointerCapture(event.pointerId); event.preventDefault(); refreshAdminNumbers();
       });
+      el('adminList').addEventListener('dragstart', (event) => event.preventDefault());
       document.addEventListener('pointermove', movePointerDrag);
       document.addEventListener('pointerup', finishPointerDrag);
       document.addEventListener('pointercancel', finishPointerDrag);

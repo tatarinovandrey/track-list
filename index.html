@@ -48,6 +48,8 @@
       .secondary { border:1px solid var(--line); color:var(--ink); background:transparent; }
       .primary { border:1px solid var(--accent); color:white; background:var(--accent); }
       .primary:hover { background:var(--accent-deep); border-color:var(--accent-deep); }
+      .danger { border-color:#b64e3d; background:#b64e3d; }
+      .danger:hover { border-color:#913a2d; background:#913a2d; }
       .admin-head { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:24px; }
       .admin-note { color:var(--muted); font-size:.88rem; line-height:1.45; }
       .admin-list { display:grid; gap:8px; margin-top:20px; }
@@ -56,7 +58,11 @@
       .drag-placeholder { min-height:58px; border:1.5px dashed #dba083; border-radius:14px; background:rgba(247,229,216,.45); }
       .handle { color:#b9a99c; font-size:1.1rem; letter-spacing:-.18em; user-select:none; cursor:grab; touch-action:none; }
       body.sorting-tracks { user-select:none; cursor:grabbing; }
-      .edit { border:0; color:var(--accent-deep); background:transparent; padding:9px; font-weight:750; }
+      .track-actions { display:flex; align-items:center; gap:2px; }
+      .icon-button { display:grid; place-items:center; width:36px; height:36px; border:0; border-radius:10px; color:var(--accent-deep); background:transparent; font-size:1.24rem; line-height:1; }
+      .icon-button:hover,.icon-button:focus-visible { background:#f6e8de; outline:0; }
+      .icon-button.delete { color:#a84937; font-size:1.32rem; }
+      .icon-button.delete:hover,.icon-button.delete:focus-visible { background:#f9e5e1; }
       .status { min-height:20px; margin:16px 0 0; color:var(--muted); font-size:.86rem; }
       .status.error { color:#a33927; }
       [hidden] { display:none !important; }
@@ -94,12 +100,13 @@
 
     <dialog id="loginDialog"><form class="dialog-content" id="loginForm"><h2>Вход</h2><p>Доступ к редактированию треков.</p><label class="field">Пароль<input id="password" type="password" required autofocus /></label><p id="loginError" class="status error" hidden></p><div class="actions"><button class="secondary" id="loginCancel" type="button">Отмена</button><button class="primary" type="submit">Войти</button></div></form></dialog>
     <dialog id="editorDialog"><form class="dialog-content" id="editorForm"><h2 id="editorTitle">Новый трек</h2><label class="field">Название<input id="trackTitleInput" maxlength="160" required /></label><label class="field">Текст трека<textarea id="trackLyricsInput" rows="10" maxlength="50000" placeholder="Вставьте текст трека"></textarea></label><p id="editorError" class="status error" hidden></p><div class="actions"><button class="secondary" id="editorCancel" type="button">Отмена</button><button class="primary" type="submit">Сохранить</button></div></form></dialog>
+    <dialog id="confirmDialog"><div class="dialog-content"><h2>Удалить трек?</h2><p id="confirmText"></p><div class="actions"><button class="secondary" id="confirmCancel" type="button">Отмена</button><button class="primary danger" id="confirmDelete" type="button">Удалить</button></div></div></dialog>
 
     <script>
       const SUPABASE_URL = 'https://alplkxztueetzuzjzyjw.supabase.co';
       const SUPABASE_KEY = 'sb_publishable_jFeabRF877B_1zd-zF7yaw_xpxngc62';
       const ADMIN_ENDPOINT = `${SUPABASE_URL}/functions/v1/track-admin`;
-      let tracks = [], adminPassword = '', editingId = null, draggedId = null;
+      let tracks = [], adminPassword = '', editingId = null, deletingId = null, draggedId = null;
       const el = (id) => document.getElementById(id);
       const homeView = el('homeView'), detailView = el('detailView'), adminView = el('adminView');
 
@@ -125,7 +132,7 @@
 
       function renderAdmin() {
         if (!adminPassword) return;
-        el('adminList').innerHTML = tracks.map((track, index) => `<article class="admin-track" draggable="false" data-id="${track.id}"><span class="handle" draggable="false" aria-label="Перетащить трек" role="button" tabindex="0">⠿</span><span class="track-number">${formatNumber(index)}</span><strong class="track-title">${escapeText(track.title)}</strong><button class="edit" type="button" data-edit="${track.id}">Изменить</button></article>`).join('');
+        el('adminList').innerHTML = tracks.map((track, index) => `<article class="admin-track" draggable="false" data-id="${track.id}"><span class="handle" draggable="false" aria-label="Перетащить трек" role="button" tabindex="0">⠿</span><span class="track-number">${formatNumber(index)}</span><strong class="track-title">${escapeText(track.title)}</strong><span class="track-actions"><button class="icon-button" type="button" data-edit="${track.id}" aria-label="Редактировать трек" title="Редактировать">✎</button><button class="icon-button delete" type="button" data-delete="${track.id}" aria-label="Удалить трек" title="Удалить">⌫</button></span></article>`).join('');
       }
 
       async function adminRequest(payload) {
@@ -136,6 +143,7 @@
       }
 
       function openEditor(id = null) { editingId = id; const track = tracks.find((item) => item.id === id); el('editorTitle').textContent = track ? 'Редактировать трек' : 'Новый трек'; el('trackTitleInput').value = track?.title || ''; el('trackLyricsInput').value = track?.lyrics || ''; el('editorError').hidden = true; el('editorDialog').showModal(); el('trackTitleInput').focus(); }
+      function openDelete(id) { const track = tracks.find((item) => item.id === id); if (!track) return; deletingId = id; el('confirmText').textContent = `«${track.title}» будет удалён без возможности восстановления.`; el('confirmDialog').showModal(); }
 
       el('search').addEventListener('input', renderHome);
       el('trackList').addEventListener('click', (event) => { const button = event.target.closest('[data-id]'); if (button) openTrack(button.dataset.id); });
@@ -147,7 +155,9 @@
       el('newTrack').addEventListener('click', () => openEditor());
       el('editorCancel').addEventListener('click', () => el('editorDialog').close());
       el('editorForm').addEventListener('submit', async (event) => { event.preventDefault(); const error = el('editorError'); error.hidden = true; const title = el('trackTitleInput').value.trim(), lyrics = el('trackLyricsInput').value; try { await adminRequest(editingId ? { action:'update', id:editingId, title, lyrics } : { action:'create', title, lyrics }); await loadTracks(); el('editorDialog').close(); setStatus('Сохранено.'); } catch (cause) { error.textContent = cause.message; error.hidden = false; } });
-      el('adminList').addEventListener('click', (event) => { const id = event.target.dataset.edit; if (id) openEditor(id); });
+      el('adminList').addEventListener('click', (event) => { const edit = event.target.closest('[data-edit]'), remove = event.target.closest('[data-delete]'); if (edit) openEditor(edit.dataset.edit); if (remove) openDelete(remove.dataset.delete); });
+      el('confirmCancel').addEventListener('click', () => { deletingId = null; el('confirmDialog').close(); });
+      el('confirmDelete').addEventListener('click', async () => { if (!deletingId) return; try { await adminRequest({ action:'delete', id:deletingId }); deletingId = null; el('confirmDialog').close(); await loadTracks(); setStatus('Трек удалён.'); } catch (cause) { el('confirmText').textContent = cause.message; } });
       function refreshAdminNumbers() {
         const items = [...el('adminList').children].filter((item) => item !== dragState?.card);
         const placeholderIndex = items.findIndex((item) => item.classList.contains('drag-placeholder'));

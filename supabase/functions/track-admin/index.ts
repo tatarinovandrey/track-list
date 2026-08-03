@@ -59,6 +59,13 @@ Deno.serve(async (request) => {
       return response(request, { ok: true });
     }
 
+    if (body.action === "delete") {
+      if (typeof body.id !== "string") return response(request, { error: "Invalid track." }, 400);
+      const { error } = await supabase.from("tracks").delete().eq("id", body.id);
+      if (error) throw error;
+      return response(request, { ok: true });
+    }
+
     if (body.action === "reorder" && Array.isArray(body.order) && body.order.every((id: unknown) => typeof id === "string")) {
       for (let index = 0; index < body.order.length; index++) {
         const { error } = await supabase.from("tracks").update({ position: 100000 + index }).eq("id", body.order[index]);

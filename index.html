@@ -75,7 +75,6 @@
       .shell::before,.shell::after { position:absolute; z-index:-1; width:66px; height:44px; content:""; opacity:.96; background:linear-gradient(90deg,var(--blue) 0 24%,transparent 24% 38%,var(--blue) 38% 60%,transparent 60% 76%,var(--blue) 76%); }
       .shell::before { top:17px; right:-8px; } .shell::after { bottom:32px; left:-8px; background:linear-gradient(90deg,var(--red) 0 24%,transparent 24% 38%,var(--red) 38% 60%,transparent 60% 76%,var(--red) 76%); }
       .topline { align-items:flex-start; gap:16px; margin-bottom:17px; padding-bottom:0; border-bottom:0; }
-      .brand-lockup { display:grid; justify-items:end; align-content:start; }.brand-logo { display:block; width:132px; max-width:36vw; height:auto; margin:-14px 0 -11px 0; }
       .eyebrow { color:var(--blue); font-size:.72rem; font-weight:800; letter-spacing:.08em; } h1 { margin-top:6px; font-size:clamp(2.25rem,9vw,4.35rem); font-weight:900; letter-spacing:-.085em; line-height:.84; text-transform:uppercase; } h2 { font-size:1.35rem; font-weight:900; letter-spacing:-.055em; text-transform:uppercase; }
       #adminTrigger { align-self:end; margin-right:-3px; opacity:.25; color:var(--muted); } #adminTrigger:hover,#adminTrigger:focus-visible { opacity:1; color:var(--blue); background:rgba(66,54,255,.08); }
       .search { padding:15px 17px; border:2px solid var(--ink); border-radius:0; background:#fff; box-shadow:4px 4px 0 var(--blue); } .search:focus { border-color:var(--red); box-shadow:5px 5px 0 var(--red); }
@@ -83,7 +82,7 @@
       .detail-header { padding-bottom:14px; border-bottom:2px solid var(--ink); }.back { font-weight:900; text-transform:uppercase; }.back:hover { color:var(--red); }.lyrics { border:2px solid var(--ink); border-radius:0; background:#fff; box-shadow:var(--shadow); font-weight:500; }
       dialog { border:2px solid var(--ink); border-radius:0; background:var(--card); box-shadow:8px 8px 0 var(--blue); } dialog::backdrop { background:rgba(8,8,8,.62); }.field { color:var(--ink); font-weight:900; letter-spacing:.06em; text-transform:uppercase; } input,textarea { border:2px solid var(--ink); border-radius:0; background:#fff; } input:focus,textarea:focus { border-color:var(--blue); box-shadow:3px 3px 0 var(--blue); }.secondary,.primary { border-radius:0; font-weight:900; text-transform:uppercase; }.secondary { border:2px solid var(--ink); background:#fff; }.secondary:hover { background:#e9e8ff; }.primary { border:2px solid var(--red); background:var(--red); }.primary:hover { border-color:var(--blue); background:var(--blue); }.danger { border-color:var(--ink); background:var(--ink); }.danger:hover { border-color:var(--red); background:var(--red); }
       .admin-head { padding-bottom:18px; border-bottom:2px solid var(--ink); }.admin-note { color:#55555b; font-size:.92rem; }.admin-track { min-height:60px; border:1px solid var(--ink); border-radius:0; background:#fff; }.admin-track.dragging { border-color:var(--blue); box-shadow:6px 6px 0 var(--blue); }.drag-placeholder { border:2px dashed var(--red); border-radius:0; background:repeating-linear-gradient(135deg,#fff 0 8px,#ffe4e3 8px 16px); }.handle { color:var(--blue); }.icon-button { border-radius:0; color:var(--blue); }.icon-button:hover,.icon-button:focus-visible { color:#fff; background:var(--blue); }.icon-button.delete { color:var(--red); }.icon-button.delete:hover,.icon-button.delete:focus-visible { color:#fff; background:var(--red); }.status { color:var(--blue); font-weight:700; }.status.error { color:var(--red); }
-      @media (max-width:480px) { .shell { padding:25px 15px 48px; }.topline { margin-bottom:17px; }.brand-logo { width:116px; margin-top:-8px; }.track { min-height:60px; }.admin-note { font-size:.86rem; } }
+      @media (max-width:480px) { .shell { padding:25px 15px 48px; }.topline { margin-bottom:17px; }.track { min-height:60px; }.admin-note { font-size:.86rem; } }
     </style>
     <style>
       @import url('https://fonts.googleapis.com/css2?family=Marck+Script&family=Montserrat:wght@400;500;600;700&display=swap');
@@ -94,7 +93,6 @@
       .shell::after { display:block; z-index:-1; left:50%; right:auto; bottom:-8px; width:min(680px,94%); height:175px; opacity:.82; transform:translateX(-50%); background:url('assets/songbook-roses.png') center bottom/contain no-repeat; }
       #homeView,#detailView,#adminView { position:relative; z-index:1; }
       .topline { align-items:flex-start; margin:0 0 18px; padding:0; border:0; }
-      .brand-logo { width:108px; max-width:32vw; margin:-10px 0 -8px; opacity:.68; filter:sepia(1) saturate(.45) hue-rotate(350deg) brightness(.52); }
       .eyebrow { color:var(--olive-deep); font-family:'Montserrat',Arial,sans-serif; font-size:.69rem; font-weight:600; letter-spacing:.12em; }
       h1 { margin:3px 0 0; color:var(--ink); font-family:'Marck Script','Segoe Script',cursive; font-size:clamp(3rem,10vw,5rem); font-weight:400; letter-spacing:-.035em; line-height:.88; text-transform:none; }
       h2 { color:var(--ink); font-family:'Marck Script','Segoe Script',cursive; font-size:2rem; font-weight:400; letter-spacing:0; text-transform:none; }
@@ -145,7 +143,7 @@
       .status { color:var(--olive-deep); font-weight:600; }
       .status.error { color:var(--danger); }
       .countdown-note { min-height:22px; margin:12px 0 0 !important; color:var(--olive-deep) !important; font-weight:600; }
-      @media (max-width:480px) { body { padding:0; }.shell { width:calc(100% - 12px); min-height:calc(100svh - 12px); margin:6px auto; padding:25px 20px 150px; border-radius:24px; }.shell::after { height:145px; opacity:.72; }.topline { margin-bottom:14px; }.brand-logo { width:100px; max-width:31vw; margin-top:-5px; }.search { margin-bottom:15px; }.track { min-height:59px; border-radius:15px; }.lyrics { padding:20px; border-radius:18px; }.admin-track { border-radius:15px; }.admin-actions { gap:8px; }.secondary,.primary { padding:0 14px; } }
+      @media (max-width:480px) { body { padding:0; }.shell { width:calc(100% - 12px); min-height:calc(100svh - 12px); margin:6px auto; padding:25px 20px 150px; border-radius:24px; }.shell::after { height:145px; opacity:.72; }.topline { margin-bottom:14px; }.search { margin-bottom:15px; }.track { min-height:59px; border-radius:15px; }.lyrics { padding:20px; border-radius:18px; }.admin-track { border-radius:15px; }.admin-actions { gap:8px; }.secondary,.primary { padding:0 14px; } }
     </style>
   </head>
   <body>
@@ -183,14 +181,6 @@
     <dialog id="deleteAllDialog"><div class="dialog-content"><h2>Удалить все песни?</h2><p>Все песни и их тексты будут удалены без возможности восстановления.</p><p class="countdown-note" id="deleteAllCountdown" aria-live="polite"></p><p id="deleteAllError" class="status error" hidden></p><div class="actions"><button class="secondary" id="deleteAllCancel" type="button">Отмена</button><button class="primary danger" id="deleteAllConfirm" type="button" disabled>Удалить все (5)</button></div></div></dialog>
 
     <script>
-      const homeTopline = document.querySelector('#homeView .topline');
-      const adminTrigger = document.getElementById('adminTrigger');
-      const brandLockup = document.createElement('div');
-      brandLockup.className = 'brand-lockup';
-      brandLockup.innerHTML = '<img class="brand-logo" src="assets/positive-hack-camp.png" alt="Positive Hack Camp" />';
-      homeTopline.append(brandLockup);
-      brandLockup.append(adminTrigger);
-
       const SUPABASE_URL = 'https://alplkxztueetzuzjzyjw.supabase.co';
       const SUPABASE_KEY = 'sb_publishable_jFeabRF877B_1zd-zF7yaw_xpxngc62';
       const ADMIN_ENDPOINT = `${SUPABASE_URL}/functions/v1/track-admin`;

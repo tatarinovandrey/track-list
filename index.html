@@ -145,17 +145,44 @@
       .countdown-note { min-height:22px; margin:12px 0 0 !important; color:var(--olive-deep) !important; font-weight:600; }
       @media (max-width:480px) { body { padding:0; }.shell { width:calc(100% - 12px); min-height:calc(100svh - 12px); margin:6px auto; padding:25px 20px 150px; border-radius:24px; }.shell::after { height:145px; opacity:.72; }.topline { margin-bottom:14px; }.search { margin-bottom:15px; }.track { min-height:59px; border-radius:15px; }.lyrics { padding:20px; border-radius:18px; }.admin-track { border-radius:15px; }.admin-actions { gap:8px; }.secondary,.primary { padding:0 14px; } }
     </style>
+    <style>
+      .header-side { display:flex; align-items:center; gap:7px; padding-top:4px; }
+      #homeView h1 { color:var(--olive-deep); }
+      .brooke-logo { display:flex; align-items:center; gap:12px; color:var(--ink); white-space:nowrap; }
+      .brooke-name { font-family:'Montserrat',Arial,sans-serif; font-size:clamp(.82rem,3vw,1.18rem); font-weight:700; letter-spacing:-.045em; }
+      .brooke-place { display:flex; align-items:center; gap:5px; min-height:28px; padding:0 11px 0 7px; border-radius:999px; color:#fffaf0; background:var(--olive); font-family:'Montserrat',Arial,sans-serif; font-size:clamp(.42rem,1.6vw,.61rem); font-weight:500; letter-spacing:.13em; }
+      .brooke-pin { display:grid; place-items:center; width:19px; height:19px; border-radius:50%; color:var(--olive); background:#fffaf0; font-size:.58rem; }
+      .header-side #adminTrigger { align-self:center; margin:0 -8px 0 -2px; }
+      .backup-home { margin-top:32px; padding-top:21px; border-top:1px solid rgba(111,130,56,.4); }
+      .backup-home-heading { margin-bottom:13px; }
+      .backup-home-heading h2 { margin:3px 0 0; color:var(--olive-deep); font-size:2.15rem; }
+      .admin-section-label { margin:21px 0 9px; color:var(--olive-deep); font-size:.78rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; }
+      .backup-admin-panel { margin-top:38px; padding:21px; border:1px solid rgba(111,130,56,.55); border-radius:22px; background:rgba(255,250,240,.7); transition:opacity .2s,filter .2s; }
+      .backup-admin-head { display:flex; align-items:center; justify-content:space-between; gap:15px; }
+      .backup-admin-head h2 { margin-top:2px; font-size:2.2rem; color:var(--olive-deep); }
+      .backup-toggle { display:flex; align-items:center; gap:8px; color:var(--olive-deep); font-size:.74rem; font-weight:700; white-space:nowrap; }
+      .backup-toggle input { width:38px; height:22px; appearance:none; padding:0; border:1px solid var(--olive-deep); border-radius:999px; background:rgba(111,130,56,.18); box-shadow:none; cursor:pointer; }
+      .backup-toggle input::after { display:block; width:16px; height:16px; margin:2px; border-radius:50%; content:""; background:#fffaf0; transition:transform .18s; }
+      .backup-toggle input:checked { background:var(--olive-deep); }
+      .backup-toggle input:checked::after { transform:translateX(16px); }
+      .backup-admin-content { margin-top:14px; }
+      .backup-admin-panel.is-disabled .backup-admin-content { pointer-events:none; filter:blur(2px); opacity:.42; user-select:none; }
+      .backup-admin-panel.is-disabled .backup-admin-head > div { opacity:.58; }
+      .transfer { font-size:1.05rem; }
+      @media (max-width:480px) { .header-side { gap:2px; }.brooke-logo { gap:6px; }.brooke-name { font-size:.67rem; }.brooke-place { min-height:21px; gap:3px; padding:0 7px 0 5px; font-size:.34rem; letter-spacing:.08em; }.brooke-pin { width:14px; height:14px; font-size:.42rem; }.header-side #adminTrigger { margin-right:-10px; }.backup-admin-panel { margin-top:30px; padding:16px; border-radius:18px; }.backup-admin-head { align-items:flex-start; flex-direction:column; gap:10px; }.backup-admin-head h2 { font-size:2rem; }.backup-toggle { font-size:.7rem; }.backup-home { margin-top:27px; } }
+    </style>
   </head>
   <body>
     <main class="shell">
       <section id="homeView">
         <div class="topline">
-          <div><span class="eyebrow">все тексты</span><h1>Трек-лист</h1></div>
-          <button class="ghost" id="adminTrigger" type="button" aria-label="Войти в админку">···</button>
+          <div><span class="eyebrow">все тексты</span><h1>Песенник</h1></div>
+          <div class="header-side"><div class="brooke-logo" aria-label="Brooke в Переделкино"><span class="brooke-name">BROOKE</span><span class="brooke-place"><span class="brooke-pin">●</span><span>В ПЕРЕДЕЛКИНО</span></span></div><button class="ghost" id="adminTrigger" type="button" aria-label="Войти в админку">···</button></div>
         </div>
         <label class="sr-only" hidden for="search">Поиск по названию</label>
         <input class="search" id="search" type="search" placeholder="Поиск по названию" autocomplete="off" />
         <div id="trackList" class="track-list" aria-live="polite"></div>
+        <section id="backupHomeSection" class="backup-home" hidden><div class="backup-home-heading"><span class="eyebrow">дополнительные песни</span><h2>Запасные</h2></div><div id="backupTrackList" class="track-list" aria-live="polite"></div></section>
         <p id="emptyState" class="empty" hidden></p>
       </section>
 
@@ -169,8 +196,10 @@
       <section id="adminView" hidden>
         <div class="admin-head"><div><span class="eyebrow">режим редактирования</span><h1>Админка</h1></div><button class="secondary" id="logout" type="button">Выйти</button></div>
         <p class="admin-note">Добавляйте и редактируйте треки. Чтобы изменить порядок, перетащите карточку за точки слева.</p>
-        <div class="actions admin-actions"><button class="primary" id="newTrack" type="button">+ Добавить трек</button><button class="secondary delete-all" id="deleteAllTracks" type="button">Удалить все песни</button></div>
-        <div id="adminList" class="admin-list"></div>
+        <div class="admin-section-label">Основные песни</div>
+        <div class="actions admin-actions"><button class="primary" id="newTrack" type="button">+ Добавить трек</button><button class="secondary delete-all" id="deleteAllTracks" type="button">Удалить все основные</button></div>
+        <div id="adminList" class="admin-list" data-section="main" data-start-index="0"></div>
+        <section id="backupAdminPanel" class="backup-admin-panel is-disabled"><div class="backup-admin-head"><div><span class="eyebrow">дополнительный блок</span><h2>Запасные</h2></div><label class="backup-toggle"><input id="backupEnabled" type="checkbox" role="switch" /><span>Показывать посетителям</span></label></div><div class="backup-admin-content"><p class="admin-note">Эти песни появятся после основного списка только когда переключатель включён.</p><div class="actions admin-actions"><button class="primary" id="newBackupTrack" type="button">+ Добавить запасную</button><button class="secondary delete-all" id="deleteAllBackupTracks" type="button">Удалить все запасные</button></div><div id="backupAdminList" class="admin-list" data-section="backup" data-start-index="0"></div></div></section>
         <p id="adminStatus" class="status" aria-live="polite"></p>
       </section>
     </main>
@@ -178,13 +207,13 @@
     <dialog id="loginDialog"><form class="dialog-content" id="loginForm"><h2>Вход</h2><p>Доступ к редактированию треков.</p><label class="field">Пароль<input id="password" type="password" required autofocus /></label><p id="loginError" class="status error" hidden></p><div class="actions"><button class="secondary" id="loginCancel" type="button">Отмена</button><button class="primary" type="submit">Войти</button></div></form></dialog>
     <dialog id="editorDialog"><form class="dialog-content" id="editorForm"><h2 id="editorTitle">Новый трек</h2><label class="field">Название<input id="trackTitleInput" maxlength="160" required /></label><label class="field">Текст трека<textarea id="trackLyricsInput" rows="10" maxlength="50000" placeholder="Вставьте текст трека"></textarea></label><p id="editorError" class="status error" hidden></p><div class="actions"><button class="secondary" id="editorCancel" type="button">Отмена</button><button class="primary" type="submit">Сохранить</button></div></form></dialog>
     <dialog id="confirmDialog"><div class="dialog-content"><h2>Удалить трек?</h2><p id="confirmText"></p><div class="actions"><button class="secondary" id="confirmCancel" type="button">Отмена</button><button class="primary danger" id="confirmDelete" type="button">Удалить</button></div></div></dialog>
-    <dialog id="deleteAllDialog"><div class="dialog-content"><h2>Удалить все песни?</h2><p>Все песни и их тексты будут удалены без возможности восстановления.</p><p class="countdown-note" id="deleteAllCountdown" aria-live="polite"></p><p id="deleteAllError" class="status error" hidden></p><div class="actions"><button class="secondary" id="deleteAllCancel" type="button">Отмена</button><button class="primary danger" id="deleteAllConfirm" type="button" disabled>Удалить все (5)</button></div></div></dialog>
+    <dialog id="deleteAllDialog"><div class="dialog-content"><h2 id="deleteAllTitle">Удалить все песни?</h2><p id="deleteAllDescription">Все песни и их тексты будут удалены без возможности восстановления.</p><p class="countdown-note" id="deleteAllCountdown" aria-live="polite"></p><p id="deleteAllError" class="status error" hidden></p><div class="actions"><button class="secondary" id="deleteAllCancel" type="button">Отмена</button><button class="primary danger" id="deleteAllConfirm" type="button" disabled>Удалить все (5)</button></div></div></dialog>
 
     <script>
       const SUPABASE_URL = 'https://alplkxztueetzuzjzyjw.supabase.co';
       const SUPABASE_KEY = 'sb_publishable_jFeabRF877B_1zd-zF7yaw_xpxngc62';
       const ADMIN_ENDPOINT = `${SUPABASE_URL}/functions/v1/track-admin`;
-      let tracks = [], adminPassword = '', editingId = null, deletingId = null, draggedId = null, deleteAllTimer = null;
+      let tracks = [], adminPassword = '', editingId = null, editingIsBackup = false, deletingId = null, draggedId = null, deleteAllTimer = null, deleteAllIsBackup = false, backupEnabled = false;
       const el = (id) => document.getElementById(id);
       const homeView = el('homeView'), detailView = el('detailView'), adminView = el('adminView');
 
@@ -193,26 +222,51 @@
       function formatNumber(index) { return String(index + 1).padStart(2, '0'); }
       function escapeText(value) { const div = document.createElement('div'); div.textContent = value; return div.innerHTML; }
 
+      const apiHeaders = { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` };
+      const mainTracks = () => tracks.filter((track) => !track.is_backup);
+      const backupTracks = () => tracks.filter((track) => track.is_backup);
+      const visibleTracks = () => [...mainTracks(), ...(backupEnabled ? backupTracks() : [])];
+      const trackCard = (track, index) => `<button class="track" type="button" data-id="${track.id}"><span class="track-number">${formatNumber(index)}</span><span class="track-title">${escapeText(track.title)}</span><span class="arrow">→</span></button>`;
+
       async function loadTracks() {
-        const response = await fetch(`${SUPABASE_URL}/rest/v1/tracks?select=id,title,lyrics,position&order=position.asc`, { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } });
-        if (!response.ok) throw new Error('Не получилось загрузить треки. Попробуйте обновить страницу.');
-        tracks = await response.json(); renderHome(); renderAdmin();
+        const [tracksResponse, settingsResponse] = await Promise.all([
+          fetch(`${SUPABASE_URL}/rest/v1/tracks?select=id,title,lyrics,position,is_backup&order=is_backup.asc,position.asc`, { headers: apiHeaders }),
+          fetch(`${SUPABASE_URL}/rest/v1/site_settings?select=backup_enabled&id=eq.1`, { headers: apiHeaders }),
+        ]);
+        if (!tracksResponse.ok || !settingsResponse.ok) throw new Error('Не получилось загрузить песни. Попробуйте обновить страницу.');
+        tracks = await tracksResponse.json();
+        const settings = await settingsResponse.json();
+        backupEnabled = settings[0]?.backup_enabled === true;
+        renderHome(); renderAdmin();
       }
 
       function renderHome() {
         const query = el('search').value.trim().toLocaleLowerCase('ru');
+        const allVisible = visibleTracks();
         const requestedPosition = /^\d+$/.test(query) ? Number(query) : null;
-        const filtered = tracks.filter((track, index) => track.title.toLocaleLowerCase('ru').includes(query) || requestedPosition === index + 1);
-        el('trackList').innerHTML = filtered.map((track) => { const index = tracks.findIndex((item) => item.id === track.id); return `<button class="track" type="button" data-id="${track.id}"><span class="track-number">${formatNumber(index)}</span><span class="track-title">${escapeText(track.title)}</span><span class="arrow">→</span></button>`; }).join('');
-        const empty = el('emptyState'); empty.hidden = filtered.length > 0; empty.textContent = tracks.length ? 'Ничего не найдено.' : 'Здесь пока нет треков. Добавьте первый в админке.';
+        const matches = (track) => track.title.toLocaleLowerCase('ru').includes(query) || requestedPosition === allVisible.indexOf(track) + 1;
+        const primary = mainTracks().filter(matches), backups = backupTracks().filter(matches);
+        el('trackList').innerHTML = primary.map((track) => trackCard(track, allVisible.indexOf(track))).join('');
+        el('backupTrackList').innerHTML = backups.map((track) => trackCard(track, allVisible.indexOf(track))).join('');
+        el('backupHomeSection').hidden = !backupEnabled || backups.length === 0;
+        const empty = el('emptyState'); empty.hidden = primary.length + (backupEnabled ? backups.length : 0) > 0; empty.textContent = allVisible.length ? 'Ничего не найдено.' : 'Здесь пока нет песен. Добавьте первую в админке.';
       }
 
-      function openTrack(id, fromHistory = false) { const track = tracks.find((item) => item.id === id); if (!track) return; if (!fromHistory) history.pushState({ view:'detail', id }, '', `#track=${encodeURIComponent(id)}`); const index = tracks.indexOf(track); el('detailNumber').textContent = `трек ${formatNumber(index)}`; el('detailTitle').textContent = track.title; const lyrics = el('lyrics'); lyrics.textContent = track.lyrics || 'Текст трека пока не добавлен.'; lyrics.classList.toggle('no-lyrics', !track.lyrics); show(detailView); }
+      function openTrack(id, fromHistory = false) { const track = tracks.find((item) => item.id === id); if (!track || (track.is_backup && !backupEnabled)) return; if (!fromHistory) history.pushState({ view:'detail', id }, '', `#track=${encodeURIComponent(id)}`); const index = visibleTracks().indexOf(track); el('detailNumber').textContent = `песня ${formatNumber(index)}`; el('detailTitle').textContent = track.title; const lyrics = el('lyrics'); lyrics.textContent = track.lyrics || 'Текст песни пока не добавлен.'; lyrics.classList.toggle('no-lyrics', !track.lyrics); show(detailView); }
+
+      function adminTrackCard(track, index, isBackup) { const target = isBackup ? 'main' : 'backup', transferLabel = isBackup ? 'Перенести в основные' : 'Перенести в запасные'; return `<article class="admin-track" draggable="false" data-id="${track.id}"><span class="handle" draggable="false" aria-label="Перетащить песню" role="button" tabindex="0">⠿</span><span class="track-number">${formatNumber(index)}</span><strong class="track-title">${escapeText(track.title)}</strong><span class="track-actions"><button class="icon-button transfer" type="button" data-transfer="${track.id}" data-target="${target}" aria-label="${transferLabel}" title="${transferLabel}">↹</button><button class="icon-button" type="button" data-edit="${track.id}" aria-label="Редактировать песню" title="Редактировать">✎</button><button class="icon-button delete" type="button" data-delete="${track.id}" aria-label="Удалить песню" title="Удалить">⌫</button></span></article>`; }
 
       function renderAdmin() {
         if (!adminPassword) return;
-        el('adminList').innerHTML = tracks.map((track, index) => `<article class="admin-track" draggable="false" data-id="${track.id}"><span class="handle" draggable="false" aria-label="Перетащить трек" role="button" tabindex="0">⠿</span><span class="track-number">${formatNumber(index)}</span><strong class="track-title">${escapeText(track.title)}</strong><span class="track-actions"><button class="icon-button" type="button" data-edit="${track.id}" aria-label="Редактировать трек" title="Редактировать">✎</button><button class="icon-button delete" type="button" data-delete="${track.id}" aria-label="Удалить трек" title="Удалить">⌫</button></span></article>`).join('');
-        el('deleteAllTracks').disabled = tracks.length === 0;
+        const primary = mainTracks(), backups = backupTracks();
+        el('adminList').innerHTML = primary.map((track, index) => adminTrackCard(track, index, false)).join('');
+        el('backupAdminList').innerHTML = backups.map((track, index) => adminTrackCard(track, primary.length + index, true)).join('');
+        el('adminList').dataset.startIndex = '0'; el('backupAdminList').dataset.startIndex = String(primary.length);
+        el('deleteAllTracks').disabled = primary.length === 0;
+        el('deleteAllBackupTracks').disabled = backups.length === 0;
+        el('backupEnabled').checked = backupEnabled;
+        el('backupAdminPanel').classList.toggle('is-disabled', !backupEnabled);
+        el('adminList').querySelectorAll('[data-transfer]').forEach((button) => button.disabled = !backupEnabled);
       }
 
       async function adminRequest(payload) {
@@ -222,17 +276,20 @@
         return data;
       }
 
-      function openEditor(id = null) { editingId = id; const track = tracks.find((item) => item.id === id); el('editorTitle').textContent = track ? 'Редактировать трек' : 'Новый трек'; el('trackTitleInput').value = track?.title || ''; el('trackLyricsInput').value = track?.lyrics || ''; el('editorError').hidden = true; el('editorDialog').showModal(); el('trackTitleInput').focus(); }
+      function openEditor(id = null, isBackup = false) { editingId = id; const track = tracks.find((item) => item.id === id); editingIsBackup = track?.is_backup ?? isBackup; el('editorTitle').textContent = track ? 'Редактировать трек' : (editingIsBackup ? 'Новая запасная' : 'Новый трек'); el('trackTitleInput').value = track?.title || ''; el('trackLyricsInput').value = track?.lyrics || ''; el('editorError').hidden = true; el('editorDialog').showModal(); el('trackTitleInput').focus(); }
       function openDelete(id) { const track = tracks.find((item) => item.id === id); if (!track) return; deletingId = id; el('confirmText').textContent = `«${track.title}» будет удалён без возможности восстановления.`; el('confirmDialog').showModal(); }
       function stopDeleteAllCountdown() { if (deleteAllTimer) clearInterval(deleteAllTimer); deleteAllTimer = null; }
-      function openDeleteAll() {
-        if (!tracks.length) return;
+      function openDeleteAll(isBackup = false) {
+        if (!(isBackup ? backupTracks() : mainTracks()).length) return;
+        deleteAllIsBackup = isBackup;
         stopDeleteAllCountdown();
         let seconds = 5;
         const confirm = el('deleteAllConfirm'), note = el('deleteAllCountdown'), error = el('deleteAllError');
+        el('deleteAllTitle').textContent = isBackup ? 'Удалить все запасные?' : 'Удалить все основные песни?';
+        el('deleteAllDescription').textContent = isBackup ? 'Все запасные песни и их тексты будут удалены без возможности восстановления.' : 'Все основные песни и их тексты будут удалены без возможности восстановления.';
         confirm.disabled = true; error.hidden = true;
         const updateCountdown = () => {
-          confirm.textContent = seconds > 0 ? `Удалить все (${seconds})` : 'Удалить все песни';
+          confirm.textContent = seconds > 0 ? `Удалить все (${seconds})` : (isBackup ? 'Удалить все запасные' : 'Удалить все основные');
           note.textContent = seconds > 0 ? `Подтверждение станет доступно через ${seconds} сек.` : 'Теперь удаление можно подтвердить.';
           if (seconds === 0) { confirm.disabled = false; stopDeleteAllCountdown(); }
         };
@@ -241,7 +298,7 @@
       }
 
       el('search').addEventListener('input', renderHome);
-      el('trackList').addEventListener('click', (event) => { const button = event.target.closest('[data-id]'); if (button) openTrack(button.dataset.id); });
+      homeView.addEventListener('click', (event) => { const button = event.target.closest('[data-id]'); if (button) openTrack(button.dataset.id); });
       el('backButton').addEventListener('click', () => history.back());
       window.addEventListener('popstate', (event) => { if (event.state?.view === 'detail') openTrack(event.state.id, true); else show(homeView); });
       el('adminTrigger').addEventListener('click', () => { el('loginError').hidden = true; el('loginDialog').showModal(); el('password').focus(); });
@@ -249,26 +306,35 @@
       el('loginForm').addEventListener('submit', async (event) => { event.preventDefault(); const candidate = el('password').value; try { const response = await fetch(ADMIN_ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'verify', password: candidate }) }); if (!response.ok) throw new Error(); adminPassword = candidate; el('password').value = ''; el('loginDialog').close(); renderAdmin(); show(adminView); } catch { el('loginError').textContent = 'Неверный пароль.'; el('loginError').hidden = false; } });
       el('logout').addEventListener('click', () => { adminPassword = ''; show(homeView); });
       el('newTrack').addEventListener('click', () => openEditor());
-      el('deleteAllTracks').addEventListener('click', openDeleteAll);
+      el('newBackupTrack').addEventListener('click', () => openEditor(null, true));
+      el('deleteAllTracks').addEventListener('click', () => openDeleteAll(false));
+      el('deleteAllBackupTracks').addEventListener('click', () => openDeleteAll(true));
+      el('backupEnabled').addEventListener('change', async (event) => {
+        const previous = backupEnabled, next = event.target.checked;
+        backupEnabled = next; renderHome(); renderAdmin();
+        try { await adminRequest({ action:'set_backup_enabled', backup_enabled:next }); setStatus(next ? 'Запасные песни видны посетителям.' : 'Запасные песни скрыты от посетителей.'); }
+        catch (cause) { backupEnabled = previous; renderHome(); renderAdmin(); setStatus(cause.message, true); }
+      });
       el('deleteAllCancel').addEventListener('click', () => { stopDeleteAllCountdown(); el('deleteAllDialog').close(); });
       el('deleteAllDialog').addEventListener('cancel', stopDeleteAllCountdown);
       el('deleteAllConfirm').addEventListener('click', async () => {
         const confirm = el('deleteAllConfirm'), error = el('deleteAllError');
         if (confirm.disabled) return;
         confirm.disabled = true; confirm.textContent = 'Удаляем…'; error.hidden = true;
-        try { await adminRequest({ action:'delete_all' }); stopDeleteAllCountdown(); el('deleteAllDialog').close(); await loadTracks(); setStatus('Все песни удалены.'); }
+        try { await adminRequest({ action:'delete_all', is_backup:deleteAllIsBackup }); stopDeleteAllCountdown(); el('deleteAllDialog').close(); await loadTracks(); setStatus(deleteAllIsBackup ? 'Запасные песни удалены.' : 'Основные песни удалены.'); }
         catch (cause) { error.textContent = cause.message; error.hidden = false; confirm.disabled = false; confirm.textContent = 'Повторить удаление'; }
       });
       el('editorCancel').addEventListener('click', () => el('editorDialog').close());
-      el('editorForm').addEventListener('submit', async (event) => { event.preventDefault(); const error = el('editorError'); error.hidden = true; const title = el('trackTitleInput').value.trim(), lyrics = el('trackLyricsInput').value; try { await adminRequest(editingId ? { action:'update', id:editingId, title, lyrics } : { action:'create', title, lyrics }); await loadTracks(); el('editorDialog').close(); setStatus('Сохранено.'); } catch (cause) { error.textContent = cause.message; error.hidden = false; } });
-      el('adminList').addEventListener('click', (event) => { const edit = event.target.closest('[data-edit]'), remove = event.target.closest('[data-delete]'); if (edit) openEditor(edit.dataset.edit); if (remove) openDelete(remove.dataset.delete); });
+      el('editorForm').addEventListener('submit', async (event) => { event.preventDefault(); const error = el('editorError'); error.hidden = true; const title = el('trackTitleInput').value.trim(), lyrics = el('trackLyricsInput').value; try { await adminRequest(editingId ? { action:'update', id:editingId, title, lyrics } : { action:'create', title, lyrics, is_backup:editingIsBackup }); await loadTracks(); el('editorDialog').close(); setStatus('Сохранено.'); } catch (cause) { error.textContent = cause.message; error.hidden = false; } });
+      adminView.addEventListener('click', async (event) => { const edit = event.target.closest('[data-edit]'), remove = event.target.closest('[data-delete]'), transfer = event.target.closest('[data-transfer]'); if (edit) openEditor(edit.dataset.edit); if (remove) openDelete(remove.dataset.delete); if (transfer) { try { await adminRequest({ action:'move_section', id:transfer.dataset.transfer, is_backup:transfer.dataset.target === 'backup' }); await loadTracks(); setStatus(transfer.dataset.target === 'backup' ? 'Песня перенесена в запасные.' : 'Песня перенесена в основные.'); } catch (cause) { setStatus(cause.message, true); } } });
       el('confirmCancel').addEventListener('click', () => { deletingId = null; el('confirmDialog').close(); });
       el('confirmDelete').addEventListener('click', async () => { if (!deletingId) return; try { await adminRequest({ action:'delete', id:deletingId }); deletingId = null; el('confirmDialog').close(); await loadTracks(); setStatus('Трек удалён.'); } catch (cause) { el('confirmText').textContent = cause.message; } });
-      function refreshAdminNumbers() {
-        const items = [...el('adminList').children].filter((item) => item !== dragState?.card);
-        let visibleIndex = 0;
+      function refreshAdminNumbers(list = dragState?.list) {
+        if (!list) return;
+        const items = [...list.children].filter((item) => item !== dragState?.card);
+        let visibleIndex = Number(list.dataset.startIndex || 0);
         items.forEach((item) => { if (!item.classList.contains('drag-placeholder')) item.querySelector('.track-number').textContent = formatNumber(visibleIndex++); });
-        if (dragState) dragState.card.querySelector('.track-number').textContent = formatNumber(items.findIndex((item) => item.classList.contains('drag-placeholder')));
+        if (dragState) dragState.card.querySelector('.track-number').textContent = formatNumber(Number(list.dataset.startIndex || 0) + items.findIndex((item) => item.classList.contains('drag-placeholder')));
       }
       function movePlaceholder(pointerY) {
         const { list, placeholder } = dragState;
@@ -280,11 +346,13 @@
         cards.forEach((card) => { const previous = before.get(card), current = card.getBoundingClientRect(), delta = previous.top - current.top; if (delta) card.animate([{ transform: `translateY(${delta}px)` }, { transform: 'translateY(0)' }], { duration: 180, easing: 'cubic-bezier(.2,.8,.2,1)' }); });
         refreshAdminNumbers();
       }
-      async function saveDraggedOrder() {
-        const ids = [...el('adminList').children].map((card) => card.dataset.id);
-        const changed = ids.some((id, index) => id !== tracks[index]?.id);
+      async function saveDraggedOrder(list) {
+        const isBackup = list.dataset.section === 'backup', current = isBackup ? backupTracks() : mainTracks();
+        const ids = [...list.children].map((card) => card.dataset.id);
+        const changed = ids.some((id, index) => id !== current[index]?.id);
         if (!changed) { draggedId = null; return; }
-        tracks = ids.map((id) => tracks.find((track) => track.id === id)); renderAdmin(); renderHome();
+        const reordered = ids.map((id) => tracks.find((track) => track.id === id));
+        tracks = isBackup ? [...mainTracks(), ...reordered] : [...reordered, ...backupTracks()]; renderAdmin(); renderHome();
         try { await adminRequest({ action:'reorder', order:ids }); setStatus('Порядок сохранён.'); }
         catch (cause) { setStatus(cause.message, true); await loadTracks(); }
         finally { draggedId = null; }
@@ -295,20 +363,20 @@
         const { card, placeholder, list } = dragState;
         list.insertBefore(card, placeholder); placeholder.remove();
         card.classList.remove('dragging'); ['position','top','left','width','pointerEvents'].forEach((property) => card.style[property] = '');
-        document.body.classList.remove('sorting-tracks'); dragState = null; refreshAdminNumbers(); saveDraggedOrder();
+        document.body.classList.remove('sorting-tracks'); dragState = null; refreshAdminNumbers(list); saveDraggedOrder(list);
       }
       function movePointerDrag(event) {
         if (!dragState || event.pointerId !== dragState.pointerId) return;
         event.preventDefault(); dragState.card.style.top = `${event.clientY - dragState.offsetY}px`; movePlaceholder(event.clientY);
       }
-      el('adminList').addEventListener('pointerdown', (event) => {
+      adminView.addEventListener('pointerdown', (event) => {
         const handle = event.target.closest('.handle'); if (!handle || event.button !== 0) return;
-        const card = handle.closest('[data-id]'), list = el('adminList'), rect = card.getBoundingClientRect(), placeholder = document.createElement('div');
+        const card = handle.closest('[data-id]'), list = handle.closest('.admin-list'), rect = card.getBoundingClientRect(), placeholder = document.createElement('div');
         placeholder.className = 'drag-placeholder'; placeholder.style.height = `${rect.height}px`; list.insertBefore(placeholder, card);
         draggedId = card.dataset.id; dragState = { pointerId:event.pointerId, card, placeholder, list, offsetY:event.clientY - rect.top };
         card.classList.add('dragging'); Object.assign(card.style, { position:'fixed', top:`${rect.top}px`, left:`${rect.left}px`, width:`${rect.width}px`, pointerEvents:'none' }); document.body.append(card); document.body.classList.add('sorting-tracks'); handle.setPointerCapture(event.pointerId); event.preventDefault(); refreshAdminNumbers();
       });
-      el('adminList').addEventListener('dragstart', (event) => event.preventDefault());
+      adminView.addEventListener('dragstart', (event) => event.preventDefault());
       document.addEventListener('pointermove', movePointerDrag);
       document.addEventListener('pointerup', finishPointerDrag);
       document.addEventListener('pointercancel', finishPointerDrag);

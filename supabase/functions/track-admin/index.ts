@@ -42,10 +42,11 @@ Deno.serve(async (request) => {
     if (body.action === "create") {
       const title = String(body.title ?? "").trim();
       const lyrics = String(body.lyrics ?? "");
+      const isBackup = body.is_backup === true;
       if (!title) return response(request, { error: "Введите название трека." }, 400);
-      const { data: lastTrack, error: lastError } = await supabase.from("tracks").select("position").order("position", { ascending: false }).limit(1).maybeSingle();
+      const { data: lastTrack, error: lastError } = await supabase.from("tracks").select("position").eq("is_backup", isBackup).order("position", { ascending: false }).limit(1).maybeSingle();
       if (lastError) throw lastError;
-      const { error } = await supabase.from("tracks").insert({ title, lyrics, position: (lastTrack?.position ?? -1) + 1 });
+      const { error } = await supabase.from("tracks").insert({ title, lyrics, position: (lastTrack?.position ?? -1) + 1, is_backup: isBackup });
       if (error) throw error;
       return response(request, { ok: true });
     }
@@ -67,7 +68,23 @@ Deno.serve(async (request) => {
     }
 
     if (body.action === "delete_all") {
-      const { error } = await supabase.from("tracks").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+      const { error } = await supabase.from("tracks").delete().eq("is_backup", body.is_backup === true);
+      if (error) throw error;
+      return response(request, { ok: true });
+    }
+
+    if (body.action === "move_section") {
+      if (typeof body.id !== "string" || typeof body.is_backup !== "boolean") return response(request, { error: "Invalid track section." }, 400);
+      const { data: lastTrack, error: lastError } = await supabase.from("tracks").select("position").eq("is_backup", body.is_backup).order("position", { ascending: false }).limit(1).maybeSingle();
+      if (lastError) throw lastError;
+      const { error } = await supabase.from("tracks").update({ is_backup: body.is_backup, position: (lastTrack?.position ?? -1) + 1, updated_at: new Date().toISOString() }).eq("id", body.id);
+      if (error) throw error;
+      return response(request, { ok: true });
+    }
+
+    if (body.action === "set_backup_enabled") {
+      if (typeof body.backup_enabled !== "boolean") return response(request, { error: "Invalid backup settings." }, 400);
+      const { error } = await supabase.from("site_settings").update({ backup_enabled: body.backup_enabled, updated_at: new Date().toISOString() }).eq("id", 1);
       if (error) throw error;
       return response(request, { ok: true });
     }
